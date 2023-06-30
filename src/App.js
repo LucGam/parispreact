@@ -1,25 +1,49 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react";
+import UserForm from "./components/UserForm";
+import UserDetails from "./components/UserDetails";
+import "./App.css";
 
-function App() {
+const App = () => {
+  const [username, setUsername] = useState("");
+  const [user, setUser] = useState(null);
+  const [repos, setRepos] = useState([]);
+
+  const fetchUserDetails = async (username) => {
+    const userResponse = await fetch(
+      `https://api.github.com/users/${username}`
+    );
+    const userJson = await userResponse.json();
+    setUser(userJson);
+
+    const reposResponse = await fetch(
+      `https://api.github.com/users/${username}/repos`
+    );
+    const reposJson = await reposResponse.json();
+    setRepos(reposJson);
+  };
+
+  const handleReset = () => {
+    setUsername("");
+    setUser(null);
+    setRepos([]);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="container">
+      <div className="app">
+        <h2>GitHub username:</h2>
+        {user ? (
+          <UserDetails user={user} repos={repos} onReset={handleReset} />
+        ) : (
+          <UserForm
+            onUserSubmit={fetchUserDetails}
+            username={username}
+            setUsername={setUsername}
+          />
+        )}
+      </div>
     </div>
   );
-}
+};
 
 export default App;
